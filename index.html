@@ -511,13 +511,6 @@
 
     <div id="contact" class="section">
         <h2>Контакты</h2>
-        <form id="contact-form">
-            <input type="text" placeholder="Ваше имя" required>
-            <input type="email" placeholder="Ваш Email" required>
-            <textarea placeholder="Сообщение" rows="5" required></textarea>
-            <button type="submit">Отправить сообщение</button>
-        </form>
-
         <div class="contact-info">
             <div class="contact-item">
                 <svg class="contact-icon" viewBox="0 0 24 24">
@@ -594,11 +587,9 @@
             { name: "Свитшот Комфорт", price: 6999, image: "assets/свитшот.jpeg", alt: "Свитшот", gender: "male", sizes: ["S", "M", "L", "XL"] },
             { name: "Джинсы Ультра", price: 10999, image: "assets/джижи.jpeg", alt: "Джинсы", gender: "male", sizes: ["S", "M", "L", "XL"] },
             { name: "Кардиган на пуговицах", price: 17999, image: "assets/кардиган.jpeg", alt: "Кардиган", gender: "female", sizes: ["XS", "S", "M", "L"] },
-            // Обувь жен
             { name: "Мюли", price: 24999, image: "assets/мюли.jpg", alt: "Обувь", gender: "female", sizes: ["35", "36", "37", "38", "39"] },
             { name: "Лоферы Курийро", price: 19999, image: "assets/Лоферы кожанные жен.jpg", alt: "Обувь", gender: "female", sizes: ["35", "36", "37", "38", "39"] },
             { name: "Кеды Уазо", price: 15999, image: "assets/Кеды.jpg", alt: "Обувь", gender: "female", sizes: ["35", "36", "37", "38", "39"] },
-            // Обувь муж
             { name: "Эспадрильи Hondarra", price: 18999, image: "assets/Эспадрильи.jpg", alt: "Обувь", gender: "male", sizes: ["40", "41", "42", "43", "44"] },
             { name: "Кожаные Дерби", price: 27999, image: "assets/Кожаные Дерби.jpg", alt: "Обувь", gender: "male", sizes: ["40", "41", "42", "43", "44"] },
             { name: "Кеды", price: 15999, image: "assets/МУжкеды.jpg", alt: "Обувь", gender: "male", sizes: ["40", "41", "42", "43", "44"] }
@@ -940,12 +931,66 @@
             }, 2000);
         }
 
-        function handleCheckout() {
-            if(cartItems.length === 0) return alert('Ваша корзина пуста!');
-            if(confirm('Перейти к оформлению заказа?')) {
-                alert('Заказ успешно оформлен! Спасибо!');
+        async function handleCheckout() {
+            if (cartItems.length === 0) return alert('Ваша корзина пуста!');
+
+            // 1. Запрос данных клиента
+            const name = prompt("Ваше имя:");
+            if (!name) return;
+            
+            const phone = prompt("Ваш телефон:");
+            if (!phone) return;
+            
+            const address = prompt("Адрес доставки:");
+            if (!address) return;
+
+            // 2. Формируем сообщение для Telegram
+            let message = `🛍 *Новый заказ в Nuan'ce!*\n\n`;
+            message += `*Клиент:* ${name}\n`;
+            message += `*Телефон:* ${phone}\n`;
+            message += `*Адрес:* ${address}\n\n`;
+            message += `*Состав заказа:*\n`;
+
+            let total = 0;
+            cartItems.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                message += `- ${item.name} (${item.size}) × ${item.quantity} = ₽${itemTotal.toLocaleString()}\n`;
+                total += itemTotal;
+            });
+
+            message += `\n*Итого:* ₽${total.toLocaleString()}`;
+
+
+            const botToken = "8059738641:AAGYpTZs80sjgzmXVHJkIMkF4x6WsluNOko"; 
+            const chatId = "1652758030"; 
+
+            try {
+                const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: chatId,
+                        text: message,
+                        parse_mode: 'Markdown'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка при отправке заказа');
+                }
+
+                // Очищаем корзину после успешной отправки
                 cartItems = [];
+                localStorage.setItem('cart', JSON.stringify(cartItems));
                 updateCart();
+                
+                alert('Заказ успешно оформлен! Мы свяжемся с вами в ближайшее время.');
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при оформлении заказа. Пожалуйста, попробуйте еще раз.');
             }
         }
 
