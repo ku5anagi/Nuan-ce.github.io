@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuan'ce | Modern Fashion</title>
+    <style>
+        :root {
+            --primary-color: #1a1a1a;
+            --accent-color: #e8dcd0;
+            --text-dark: #2a2a2a;
+            --text-light: #f8f8f8;
+            --transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: #ffffff;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(10px);
+            padding: 1.2rem 5%;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.05);
+        }
+
+        button {
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--text-dark);
+            transition: var(--transition);
+        }
+
+        button:hover::after {
+            width: 100%;
+        }
+
+        .section {
+            display: none;
+            padding: 4rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .active {
+            display: block;
+            animation: fadeIn 0.6s ease;
+        }
+
+        h1, h2 {
+            font-weight: 300;
+            letter-spacing: 2px;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .product-grid {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+        .product-card {
+            flex-basis: 30%;
+            min-width: 300px;
+            margin: 1rem;
+            text-align: center;
+        }
+
+        .product-image {
+            max-width: 100%;
+            height: 400px;
+            object-fit: cover;
+            padding: 20px 0;
+            transition: var(--transition);
+        }
+        
+        .product-card h3 {
+            font-size: 1.2rem;
+            margin: 15px 0;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+            background: #fff;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.03);
+        }
+
+        .buy-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 25px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .buy-btn:hover {
+            background: var(--accent-color);
+            color: var(--text-dark);
+        }
+
+        .buy-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .stock-info {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .stock-info.low {
+            color: #e74c3c;
+        }
+
+        .sizes {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .size-selector {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .size-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .size-btn:hover {
+            border-color: var(--primary-color);
+        }
+
+        .size-btn.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .size-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            text-decoration: line-through;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem;
+            margin: 1rem 0;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .quantity-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+        }
+
+        .quantity-btn:hover {
+            background: var(--accent-color);
+            color: var(--text-dark);
+            transform: scale(1.1);
+        }
+
+        .quantity-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .remove-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #ff6b6b;
+            transition: var(--transition);
+            margin-left: 10px;
+        }
+
+        .remove-btn:hover {
+            transform: scale(1.2);
+            color: #ff0000;
+        }
+
+        #cart-total {
+            font-size: 1.5rem;
+            text-align: right;
+            margin: 2rem 0;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .checkout-btn:hover {
+            background: var(--accent-color);
+            color: var(--text-dark);
+        }
+
+        .image-caption {
+            text-align: center;
+            margin-top: -20px;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            padding-bottom: 20px;
+        }
+
+        #contact-form {
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 20px;
+        }
+
+        #contact-form input,
+        #contact-form textarea {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        #contact-form button {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        #contact-form button:hover {
+            background: var(--accent-color);
+            color: var(--text-dark);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            gap: 0.5rem;
+        }
+
+        .page-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .page-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .page-btn:hover:not(.active) {
+            background: #f5f5f5;
+        }
+
+        .filters {
+            text-align: center;
+            margin: 2rem 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 25px;
+            border: 2px solid transparent;
+            background: transparent;
+            color: #666;
+            border-radius: 25px;
+            transition: var(--transition);
+            cursor: pointer;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            min-width: 120px;
+        }
+
+        .filter-btn:hover {
+            color: #333;
+            border-color: #e0e0e0;
+        }
+
+        .filter-btn.active {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 500;
+            background: transparent;
+        }
+
+        .contact-info {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: var(--accent-color);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            color: var(--text-dark);
+        }
+   
+        .contact-icon {
+            width: 24px;
+            height: 24px;
+            fill: var(--primary-color);
+        }
+
+        .telegram-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--primary-color);
+            margin-top: 1rem;
+            padding: 12px 24px;
+            border: 1px solid var(--primary-color);
+            border-radius: 25px;
+            transition: var(--transition);
+        }
+
+        .telegram-link:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .telegram-link:hover .contact-icon {
+            fill: white;
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+            color: #7a7a7a;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                flex-wrap: wrap;
+                padding: 1rem;
+                gap: 0.8rem;
+            }
+            
+            button {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .product-card {
+                flex-basis: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <img src="assets/logo3.png (1).png" width="225px" alt="Логотип Nuan'ce">
+        </div>
+    </div>
+    
+    <nav>
+        <button onclick="showSection('home')">ГЛАВНАЯ</button>
+        <button onclick="showSection('shop')">КАТАЛОГ</button>
+        <button onclick="showSection('cart')">КОРЗИНА (<span id="cart-counter">0</span>)</button>
+        <button onclick="showSection('contact')">КОНТАКТЫ</button>
+    </nav>
+
+    <div id="home" class="section active">
+        <h1>Nuan'ce</h1>
+        <p style="text-align: center; max-width: 800px; margin: 0 auto 40px;">
+            Искусство детали, где каждый оттенок стиля становится шедевром вашего гардероба.<br>
+            Откройте мир изысканных нюансов, безупречного кроя и элегантности, которая говорит без слов
+        </p>
+        
+        <div class="product-grid">
+            <div class="product-card">
+                <img src="assets/мужчина_для_главной_стран.png" alt="Paul Derossi" class="product-image">
+                <div class="image-caption">Paul Derossi</div>
+            </div>
+            <div class="product-card">
+                <img src="assets/модель.png" alt="Shiroyama Reika" class="product-image">
+                <div class="image-caption">Shiroyama Reika</div>
+            </div>
+        </div>
+
+        <h2 style="margin-top: 4rem;">Новая коллекция</h2>
+        <div class="product-grid" id="new-collection">
+        </div>
+    </div>
+
+    <div id="shop" class="section">
+        <h2>Полный каталог</h2>
+        <div class="filters">
+            <button class="filter-btn active" onclick="setFilter('all')">Все</button>
+            <button class="filter-btn" onclick="setFilter('male')">Мужское</button>
+            <button class="filter-btn" onclick="setFilter('female')">Женское</button>
+        </div>
+        <div class="product-grid" id="catalog-items">
+        </div>
+        <div class="pagination" id="pagination">
+        </div>
+    </div>
+
+    <div id="cart" class="section">
+        <h2>Ваша корзина</h2>
+        <div id="cart-items"></div>
+        <div id="cart-total">
+            Итого: ₽<span id="total">0</span>
+        </div>
+        <button class="checkout-btn" onclick="handleCheckout()">Оформить заказ</button>
+    </div>
+
+    <div id="contact" class="section">
+        <h2>Контакты</h2>
+        <form id="contact-form">
+            <input type="text" placeholder="Ваше имя" required>
+            <input type="email" placeholder="Ваш Email" required>
+            <textarea placeholder="Сообщение" rows="5" required></textarea>
+            <button type="submit">Отправить сообщение</button>
+        </form>
+
+        <div class="contact-info">
+            <div class="contact-item">
+                <svg class="contact-icon" viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+                <span>Мосфильмовская ул., 35, Москва</span>
+            </div>
+
+            <div class="contact-item">
+                <svg class="contact-icon" viewBox="0 0 24 24">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/>
+                </svg>
+                <span>Nuance202@gmail.ru</span>
+            </div>
+
+            <div class="contact-item">
+                <svg class="contact-icon" viewBox="0 0 24 24">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                </svg>
+                <span>+7 977 777 7797</span>
+            </div>
+
+            <a href="https://t.me/Nuancesite" class="telegram-link" target="_blank">
+                <svg class="contact-icon" viewBox="0 0 24 24">
+                    <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71L12.6 16.3l-1.99 1.93c-.23.23-.42.42-.83.42z"/>
+                </svg>
+                <span>Наш Telegram</span>
+            </a>
+        </div>
+
+        <div class="copyright">
+            Copyright © 2025 Website. All rights reserved.
+        </div>
+    </div>
+
+    <script>
+        let cartItems = JSON.parse(localStorage.getItem('cart')) || [];
+        let currentPage = 1;
+        const itemsPerPage = 6;
+        let currentFilter = 'all';
+
+        // Товарные остатки по размерам
+        const stock = {
+            "Royal Stride": { "S": 5, "M": 5, "L": 3, "XL": 2 },
+            "Платье Этуаль": { "XS": 3, "S": 2, "M": 2, "L": 0 },
+            "Футболка Поло": { "S": 3, "M": 5, "L": 4, "XL": 2 },
+            "Брюки Люше": { "XS": 4, "S": 4, "M": 3, "L": 1 },
+            "Брюки Birmingham": { "S": 4, "M": 3, "L": 2, "XL": 1 },
+            "Комбинезон Бархат": { "XS": 2, "S": 1, "M": 0, "L": 0 },
+            "Рубашка Классик": { "S": 2, "M": 6, "L": 4, "XL": 2 },
+            "Юбка Карандаш": { "XS": 2, "S": 4, "M": 2, "L": 1 },
+            "Жакет Элеганс": { "XS": 3, "S": 2, "M": 1, "L": 1 },
+            "Свитшот Комфорт": { "S": 3, "M": 4, "L": 5, "XL": 1 },
+            "Джинсы Ультра": { "S": 5, "M": 4, "L": 3, "XL": 2 },
+            "Кардиган на пуговицах": { "XS": 4, "S": 3, "M": 2, "L": 1 },
+            "Мюли": { "35": 2, "36": 3, "37": 1, "38": 2, "39": 1 },
+            "Лоферы Курийро": { "35": 1, "36": 2, "37": 1, "38": 0, "39": 0 },
+            "Кеды Уазо": { "35": 3, "36": 2, "37": 1, "38": 1, "39": 0 },
+            "Эспадрильи Hondarra": { "40": 2, "41": 3, "42": 1, "43": 1, "44": 0 },
+            "Кожаные Дерби": { "40": 1, "41": 1, "42": 1, "43": 0, "44": 1 },
+            "Кеды": { "40": 3, "41": 2, "42": 1, "43": 1, "44": 0 }
+        };
+
+        const catalogProducts = [
+            { name: "Royal Stride", price: 15999, image: "assets/костюмМуж.png", alt: "Костюм", gender: "male", sizes: ["S", "M", "L", "XL"] },
+            { name: "Платье Этуаль", price: 12499, image: "assets/платье1.jpeg", alt: "Платье", gender: "female", sizes: ["XS", "S", "M", "L"] },
+            { name: "Футболка Поло", price: 22999, image: "assets/футболка.jpeg", alt: "Футболка", gender: "male", sizes: ["S", "M", "L", "XL"] },
+            { name: "Брюки Люше", price: 8999, image: "assets/брюкижен.jpeg", alt: "Брюки", gender: "female", sizes: ["XS", "S", "M", "L"] },
+            { name: "Брюки Birmingham", price: 9499, image: "assets/брюкмужс.jpeg", alt: "Брюки", gender: "male", sizes: ["S", "M", "L", "XL"] },
+            { name: "Комбинезон Бархат", price: 18499, image: "assets/комбинезон.jpeg", alt: "Комбинезон", gender: "female", sizes: ["XS", "S", "M", "L"] },
+            { name: "Рубашка Классик", price: 7499, image: "assets/рубашкабелая.jpeg", alt: "Рубашка", gender: "male", sizes: ["S", "M", "L", "XL"] },
+            { name: "Юбка Карандаш", price: 11999, image: "assets/юбкакарандаш.jpeg", alt: "Юбка", gender: "female", sizes: ["XS", "S", "M", "L"] },
+            { name: "Жакет Элеганс", price: 16999, image: "assets/жакет.jpeg", alt: "Жакет", gender: "female", sizes: ["S", "M", "L", "XL"] },
+            { name: "Свитшот Комфорт", price: 6999, image: "assets/свитшот.jpeg", alt: "Свитшот", gender: "male", sizes: ["S", "M", "L", "XL"] },
+            { name: "Джинсы Ультра", price: 10999, image: "assets/джижи.jpeg", alt: "Джинсы", gender: "male", sizes: ["S", "M", "L", "XL"] },
+            { name: "Кардиган на пуговицах", price: 17999, image: "assets/кардиган.jpeg", alt: "Кардиган", gender: "female", sizes: ["XS", "S", "M", "L"] },
+            // Обувь жен
+            { name: "Мюли", price: 24999, image: "assets/мюли.jpg", alt: "Обувь", gender: "female", sizes: ["35", "36", "37", "38", "39"] },
+            { name: "Лоферы Курийро", price: 19999, image: "assets/Лоферы кожанные жен.jpg", alt: "Обувь", gender: "female", sizes: ["35", "36", "37", "38", "39"] },
+            { name: "Кеды Уазо", price: 15999, image: "assets/Кеды.jpg", alt: "Обувь", gender: "female", sizes: ["35", "36", "37", "38", "39"] },
+            // Обувь муж
+            { name: "Эспадрильи Hondarra", price: 18999, image: "assets/Эспадрильи.jpg", alt: "Обувь", gender: "male", sizes: ["40", "41", "42", "43", "44"] },
+            { name: "Кожаные Дерби", price: 27999, image: "assets/Кожаные Дерби.jpg", alt: "Обувь", gender: "male", sizes: ["40", "41", "42", "43", "44"] },
+            { name: "Кеды", price: 15999, image: "assets/МУжкеды.jpg", alt: "Обувь", gender: "male", sizes: ["40", "41", "42", "43", "44"] }
+        ];
+
+        // Товары новой коллекции (первые 6 товаров)
+        const newCollectionProducts = catalogProducts.slice(0, 6);
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+            
+            if(sectionId === 'shop') {
+                loadCatalogPage(1);
+            } else if(sectionId === 'home') {
+                loadNewCollection();
+            } else if(sectionId === 'cart') {
+                updateCart();
+            }
+        }
+
+        // Загрузка новой коллекции на главной странице
+        function loadNewCollection() {
+            const newCollectionDiv = document.getElementById('new-collection');
+            newCollectionDiv.innerHTML = '';
+            
+            newCollectionProducts.forEach(product => {
+                const productCard = createProductCard(product);
+                newCollectionDiv.appendChild(productCard);
+            });
+        }
+
+        function createProductCard(product) {
+            const availableSizes = product.sizes.filter(size => {
+                return stock[product.name] && stock[product.name][size] > 0;
+            });
+            
+            const isOutOfStock = availableSizes.length === 0;
+            const totalStock = product.sizes.reduce((sum, size) => {
+                return sum + (stock[product.name] && stock[product.name][size] ? stock[product.name][size] : 0);
+            }, 0);
+            
+            const stockClass = totalStock < 3 ? 'stock-info low' : 'stock-info';
+            
+            const productCard = document.createElement('div');
+            productCard.className = 'product-card';
+            productCard.innerHTML = `
+                <img src="${product.image}" alt="${product.alt}" class="product-image">
+                <div class="product-info">
+                    <h3>${product.name}</h3>
+                    <p>₽${product.price.toLocaleString()}</p>
+                    <div class="size-selector" id="size-selector-${product.name.replace(/\s+/g, '-')}"></div>
+                    <div class="${stockClass}">${getStockText(totalStock)}</div>
+                    <button onclick="addToCartWithSize('${product.name}', ${product.price})" 
+                            class="buy-btn" ${isOutOfStock ? 'disabled' : ''}>
+                        ${isOutOfStock ? 'Нет в наличии' : 'Добавить в корзину'}
+                    </button>
+                </div>
+            `;
+            
+            // Добавляем кнопки размеров
+            const sizeSelector = productCard.querySelector('.size-selector');
+            product.sizes.forEach(size => {
+                const sizeBtn = document.createElement('button');
+                sizeBtn.className = 'size-btn';
+                sizeBtn.textContent = size;
+                
+                if (stock[product.name] && stock[product.name][size] <= 0) {
+                    sizeBtn.classList.add('disabled');
+                }
+                
+                sizeBtn.onclick = function() {
+                    document.querySelectorAll(`#size-selector-${product.name.replace(/\s+/g, '-')} .size-btn`).forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                };
+                
+                sizeSelector.appendChild(sizeBtn);
+            });
+            
+            return productCard;
+        }
+
+        function getStockText(quantity) {
+            if (quantity <= 0) return 'Нет в наличии';
+            if (quantity < 3) return `Осталось мало: ${quantity} шт.`;
+            return `В наличии: ${quantity} шт.`;
+        }
+
+        function setFilter(gender) {
+            currentFilter = gender;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            loadCatalogPage(1);
+        }
+
+        function getFilteredProducts() {
+            return catalogProducts.filter(product => {
+                return currentFilter === 'all' || product.gender === currentFilter;
+            });
+        }
+
+        function loadCatalogPage(page) {
+            currentPage = page;
+            const filteredProducts = getFilteredProducts();
+            const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+            
+            if(page > totalPages) page = totalPages;
+            
+            const startIndex = (page - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const pageProducts = filteredProducts.slice(startIndex, endIndex);
+            
+            const catalogItemsDiv = document.getElementById('catalog-items');
+            catalogItemsDiv.innerHTML = '';
+            
+            pageProducts.forEach(product => {
+                const productCard = createProductCard(product);
+                catalogItemsDiv.appendChild(productCard);
+            });
+            
+            updatePagination(filteredProducts.length);
+        }
+
+        function updatePagination(totalItems) {
+            const totalPages = Math.ceil(totalItems / itemsPerPage);
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+            
+            for(let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => loadCatalogPage(i);
+                paginationDiv.appendChild(pageBtn);
+            }
+        }
+
+        function addToCartWithSize(name, price) {
+            const sizeSelector = document.querySelector(`#size-selector-${name.replace(/\s+/g, '-')} .size-btn.selected`);
+            
+            if (!sizeSelector) {
+                alert('Пожалуйста, выберите размер!');
+                return;
+            }
+            
+            const size = sizeSelector.textContent;
+            const availableStock = stock[name] && stock[name][size] ? stock[name][size] : 0;
+            
+            if (availableStock <= 0) {
+                alert('Этот размер закончился!');
+                return;
+            }
+            
+            const existingItem = cartItems.find(item => item.name === name && item.size === size);
+            
+            if(existingItem) {
+                if (existingItem.quantity >= availableStock) {
+                    alert('Достигнуто максимальное количество товара этого размера в наличии!');
+                    return;
+                }
+                existingItem.quantity++;
+            } else {
+                cartItems.push({ 
+                    name: name, 
+                    price: Number(price),
+                    quantity: 1,
+                    size: size
+                });
+            }
+            
+            // Уменьшаем остаток
+            stock[name][size]--;
+            
+            updateCart();
+            showCartNotification(`${name} (размер: ${size})`);
+            
+            // Обновляем отображение остатков
+            updateStockDisplays(name);
+        }
+
+        function updateStockDisplays(productName) {
+            // Обновляем на главной странице (новая коллекция)
+            const newCollectionItems = document.querySelectorAll('#new-collection .product-card');
+            newCollectionItems.forEach(item => {
+                const itemName = item.querySelector('h3').textContent;
+                if (itemName === productName) {
+                    updateProductCardStock(item, productName);
+                }
+            });
+            
+            // Обновляем в каталоге
+            const catalogItems = document.querySelectorAll('#catalog-items .product-card');
+            catalogItems.forEach(item => {
+                const itemName = item.querySelector('h3').textContent;
+                if (itemName === productName) {
+                    updateProductCardStock(item, productName);
+                }
+            });
+        }
+
+        function updateProductCardStock(card, productName) {
+            const product = catalogProducts.find(p => p.name === productName);
+            if (!product) return;
+            
+            const totalStock = product.sizes.reduce((sum, size) => {
+                return sum + (stock[productName] && stock[productName][size] ? stock[productName][size] : 0);
+            }, 0);
+            
+            const isOutOfStock = totalStock <= 0;
+            const stockClass = totalStock < 3 ? 'stock-info low' : 'stock-info';
+            
+            const stockElement = card.querySelector('.stock-info');
+            stockElement.className = stockClass;
+            stockElement.textContent = getStockText(totalStock);
+            
+            const button = card.querySelector('.buy-btn');
+            button.disabled = isOutOfStock;
+            button.textContent = isOutOfStock ? 'Нет в наличии' : 'Добавить в корзину';
+            
+            // Обновляем доступность размеров
+            const sizeSelector = card.querySelector('.size-selector');
+            sizeSelector.innerHTML = '';
+            
+            product.sizes.forEach(size => {
+                const sizeBtn = document.createElement('button');
+                sizeBtn.className = 'size-btn';
+                sizeBtn.textContent = size;
+                
+                if (stock[productName] && stock[productName][size] <= 0) {
+                    sizeBtn.classList.add('disabled');
+                }
+                
+                sizeBtn.onclick = function() {
+                    document.querySelectorAll(`#size-selector-${productName.replace(/\s+/g, '-')} .size-btn`).forEach(btn => {
+                        btn.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                };
+                
+                sizeSelector.appendChild(sizeBtn);
+            });
+        }
+
+        function updateCart() {
+            try {
+                localStorage.setItem('cart', JSON.stringify(cartItems));
+                
+                const cartItemsDiv = document.getElementById('cart-items');
+                if(!cartItemsDiv) return;
+                
+                cartItemsDiv.innerHTML = '';
+                
+                let total = 0;
+                cartItems.forEach((item, index) => {
+                    total += item.price * item.quantity;
+                    const availableStock = stock[item.name] && stock[item.name][item.size] ? stock[item.name][item.size] : 0;
+                    
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'cart-item';
+                    itemDiv.innerHTML = `
+                        <div>
+                            <h3>${item.name} (${item.size})</h3>
+                            <p>₽${item.price.toLocaleString()} x ${item.quantity}</p>
+                        </div>
+                        <div class="quantity-control">
+                            <button class="quantity-btn" onclick="updateQuantity(${index}, -1)">-</button>
+                            <span>${item.quantity}</span>
+                            <button class="quantity-btn" onclick="updateQuantity(${index}, 1)" 
+                                    ${availableStock <= 0 ? 'disabled' : ''}>+</button>
+                            <button class="remove-btn" onclick="removeItem(${index})">🗑️</button>
+                        </div>
+                    `;
+                    cartItemsDiv.appendChild(itemDiv);
+                });
+
+                document.getElementById('total').textContent = total.toLocaleString();
+                document.getElementById('cart-counter').textContent = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+            } catch(e) {
+                console.error('Ошибка обновления корзины:', e);
+            }
+        }
+
+        function updateQuantity(index, change) {
+            const item = cartItems[index];
+            
+            if (change > 0) {
+                const availableStock = stock[item.name] && stock[item.name][item.size] ? stock[item.name][item.size] : 0;
+                if (availableStock <= 0) {
+                    alert('Достигнуто максимальное количество товара этого размера в наличии!');
+                    return;
+                }
+                stock[item.name][item.size]--;
+            } else {
+                stock[item.name][item.size]++;
+            }
+            
+            item.quantity += change;
+            
+            if(item.quantity < 1) {
+                cartItems.splice(index, 1);
+            }
+            
+            updateCart();
+            updateStockDisplays(item.name);
+        }
+
+        function removeItem(index) {
+            if(confirm('Удалить товар из корзины?')) {
+                const item = cartItems[index];
+                // Возвращаем товары на склад
+                stock[item.name][item.size] += item.quantity;
+                cartItems.splice(index, 1);
+                updateCart();
+                updateStockDisplays(item.name);
+            }
+        }
+
+        function showCartNotification(message) {
+            const notification = document.createElement('div');
+            notification.textContent = `✓ Добавлено ${message} в корзину!`;
+            notification.style.position = 'fixed';
+            notification.style.bottom = '20px';
+            notification.style.right = '20px';
+            notification.style.background = '#27ae60';
+            notification.style.color = 'white';
+            notification.style.padding = '15px';
+            notification.style.borderRadius = '8px';
+            notification.style.zIndex = '1000';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 2000);
+        }
+
+        function handleCheckout() {
+            if(cartItems.length === 0) return alert('Ваша корзина пуста!');
+            if(confirm('Перейти к оформлению заказа?')) {
+                alert('Заказ успешно оформлен! Спасибо!');
+                cartItems = [];
+                updateCart();
+            }
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCart();
+            loadNewCollection();
+        });
+    </script>
+</body>
+</html>
